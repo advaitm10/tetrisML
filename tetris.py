@@ -1,6 +1,13 @@
+'''
+Notes:
+- For whatever reason current block isn't being drawn
+- All movement is fucked, especially hard drop
+'''
+
 import random
 import pygame
 import time 
+import sys
 pygame.init()
 win=pygame.display.set_mode((420, 840))
 clock= pygame.time.Clock()
@@ -8,7 +15,7 @@ clock= pygame.time.Clock()
 score= 0
 level= 0
 lines= 0
-field= [[1]*10 for _ in range(22)]
+field= [[0]*10 for _ in range(22)]
 
 
 run= True
@@ -16,7 +23,7 @@ play= True
 setState= False
 t= 48
 frameCounter= 0
-font= pygame.font.SysFont('arial', 30)
+font= pygame.font.SysFont('arial', 15)
 
 
 hitboxes= {
@@ -108,7 +115,7 @@ def drawWin():
             tempX+=40
         tempY+=40
     pygame.draw.rect(win, (255, 255, 255), (10, 40, 400, 800), 2)
-    text= font.render('Score: '+ str(score)+ '\nLevel: '+ str(level), 1, (255, 255, 255))
+    
     blockY= 40+block.y*20
     for y in range(len(block.hbox)):
         blockX= 10+block.x*20
@@ -118,7 +125,10 @@ def drawWin():
             blockX+=40
         blockY+=40
 
-    win.blit(text, (0, 0))
+    text= font.render('Score: '+ str(score), 1, (255, 255, 255))
+    win.blit(text, (10, 0))
+    text= font.render('Level: '+ str(level), 1, (255, 255, 255))
+    win.blit(text, (10, 15))
 
 def drawEndScreen():
     text= font.render('Score: '+ str(score)+ '\nLevel: '+ str(level), 1, (255, 255, 255))
@@ -253,7 +263,8 @@ while run:
     else:
         drawEndScreen()
 
-
+    pygame.display.update()
     clock.tick(30)
 
 pygame.quit()
+sys.exit()
