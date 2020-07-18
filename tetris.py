@@ -1,15 +1,20 @@
 '''
 Notes:
-- For whatever reason current block isn't being drawn
-- All movement is fucked, especially hard drop
+- Hard drop and rotation are fucked up
+- Check collide is fucked, block goes through blocks when moving horizontally but not vertically
+- Check floor is fucked
+- Lines dont clear right
+- Need to change levelling speeds
 '''
+
+blockSize= 20
 
 import random
 import pygame
 import time 
 import sys
 pygame.init()
-win=pygame.display.set_mode((420, 840))
+win=pygame.display.set_mode((blockSize*10+20, blockSize*20+40))
 clock= pygame.time.Clock()
 
 score= 0
@@ -105,25 +110,29 @@ def clear():
         score+= 1200* (level+1)
 
 def drawWin():
+    win.fill((0, 0, 0))
     tempY= 40
-    for y in range(len(field)):
+    for y in range(2, len(field)):
         tempX= 10
         for x in field[y]:
             if(x==1):
-                win.fill((255, 255, 255), (tempX, tempY, 40, 40))
-                pygame.draw.rect(win, (0, 0, 255), (tempX, tempY, 40, 40), 5)
-            tempX+=40
-        tempY+=40
-    pygame.draw.rect(win, (255, 255, 255), (10, 40, 400, 800), 2)
+                win.fill((255, 255, 255), (tempX, tempY, blockSize, blockSize))
+                pygame.draw.rect(win, (0, 0, 255), (tempX, tempY, blockSize, blockSize), 5)
+            tempX+=blockSize
+        tempY+=blockSize
+
+    pygame.draw.rect(win, (255, 255, 255), (10, 40, blockSize*10, blockSize*20), 2)
     
-    blockY= 40+block.y*20
-    for y in range(len(block.hbox)):
-        blockX= 10+block.x*20
-        for x in block.hbox[y]:
-            win.fill((255, 255, 255), (tempX, tempY, 40, 40))
-            pygame.draw.rect(win, (0, 0, 255), (tempX, tempY, 40, 40), 5)
-            blockX+=40
-        blockY+=40
+    blockY= 40+(block.y-2)*blockSize
+    if(block.y>1):
+        for y in range(len(block.hbox)):
+            blockX= 10+(block.x)*blockSize
+            for x in block.hbox[y]:
+                if(x==1):
+                    win.fill((255, 255, 255), (blockX, blockY, blockSize, blockSize))
+                    pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
+                blockX+=blockSize
+            blockY+=blockSize
 
     text= font.render('Score: '+ str(score), 1, (255, 255, 255))
     win.blit(text, (10, 0))
@@ -131,20 +140,25 @@ def drawWin():
     win.blit(text, (10, 15))
 
 def drawEndScreen():
-    text= font.render('Score: '+ str(score)+ '\nLevel: '+ str(level), 1, (255, 255, 255))
-    win.blit(text, (0, 0))
+    win.fill((0, 0, 0))
+    text= font.render('Score: '+ str(score), 1, (255, 255, 255))
+    win.blit(text, (10, 0))
+    text= font.render('Level: '+ str(level), 1, (255, 255, 255))
+    win.blit(text, (10, 15))
 
 def checkKeys(keys): 
     temp= block
     if(keys[pygame.K_LEFT]):
-        temp.x-=1
-        if(temp.checkCollide()):
-            block.x-=1
+        if(block.x != 0):
+            temp.x-=1
+            if(not temp.checkCollide()):
+                block.x-=1
         return False
     elif(keys[pygame.K_RIGHT]):
-        temp.x+=1
-        if(temp.checkCollide()):
-            block.x+=1
+        if((block.x+len(block.hbox[0])-1) != 9):
+            temp.x+=1
+            if(not temp.checkCollide()):
+                block.x+=1
         return False
     elif(keys[pygame.K_DOWN]):
         while(not block.checkFloor()):
@@ -154,12 +168,12 @@ def checkKeys(keys):
         return True
     elif(keys[pygame.K_a]):
         temp.rotate(True)
-        if(temp.checkCollide()):
+        if(not temp.checkCollide()):
             block.rotate(True)
         return False
     elif(keys[pygame.K_s]):
         temp.rotate(False)
-        if(temp.checkCollide()):
+        if(not temp.checkCollide()):
             block.rotate(False)
         return False
 
@@ -179,12 +193,11 @@ class Block:
         floorY= self.y+len(self.hbox)-1
         if(floorY== 21):
             return True
-        count= 0
-        for i in self.hbox[len(self.hbox)-1]: #ERROR
-            floorX= self.x+count
-            if(i==1 and field[floorY+1][floorX]==1): #ERROR
+        blockX= 0
+        for x in range(self.x, self.x+len(self.hbox[0])):
+            if(self.hbox[-1][blockX]==1 and field[floorY+1][x]): #ERROR
                 return True
-            count+=1 
+            blockX+=1
         return False
 
     def rotate(self, ccw):
@@ -201,11 +214,15 @@ class Block:
                         temp[x].append(y[x])
                 self.hbox= temp
 
-    def checkCollide(self): 
-        for i in range(block.y, block.y+ len(block.hbox)):
-            for j in range(block.x, block.x+ len(block.hbox[0])):
-                if(block.hbox[i-block.y][j-block.x]==1 and field[i][j]==1):
+    def checkCollide(self):
+        blockY= self.y 
+        for y in self.hbox:
+            blockX= self.x
+            for x in y:
+                if(field[blockY][blockX]==1 and x==1): #ERROR only gets messed up when trying to go through blocks
                     return True
+                blockX+=1
+            blockY+=1
         return False
 
 block= Block(None)
@@ -213,6 +230,10 @@ last= block.blockType
 nextBlock= Block(last)
 
 while run:
+    for event in pygame.event.get():
+        if event.type== pygame.QUIT:
+            run= False
+
     if(play):
         drawWin()
             
@@ -220,10 +241,6 @@ while run:
             block= nextBlock
             last= block.blockType
             nextBlock= Block(last)
-        
-        for event in pygame.event.get():
-            if event.type== pygame.QUIT:
-                run= False
         
         keys= pygame.key.get_pressed()
 
@@ -239,11 +256,16 @@ while run:
                 else:
                     frameCounter= 0
                     block.set= True
-                    #DOUBLE CHECK THAT FOR LOOP HERE MAKES SENSE
-                    for i in range(block.y, block.y+ len(block.hbox)):
-                        for j in range(block.x, block.x+ len(block.hbox[0])):
-                            if(block.hbox[i-block.y][j-block.x]==1):
-                                field[i][j]= block.hbox[i-block.y][j-block.x]
+                    #Adds current block to the field TODO
+                    blockY= block.y
+                    for y in block.hbox:
+                        blockX= block.x
+                        for x in y:
+                            if(x==1):
+                                field[blockY][blockX]= 1
+                            blockX+=1
+                        blockY+=1
+                    
                     clear()
                     if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
                         play= False
@@ -264,7 +286,7 @@ while run:
         drawEndScreen()
 
     pygame.display.update()
-    clock.tick(30)
+    clock.tick(20)
 
 pygame.quit()
 sys.exit()
