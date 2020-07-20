@@ -229,62 +229,102 @@ block= Block(None)
 last= block.blockType
 nextBlock= Block(last)
 
+# while run:
+#     for event in pygame.event.get():
+#         if event.type== pygame.QUIT:
+#             run= False
+
+#     if(play):
+#         drawWin()
+            
+#         if(block.set):
+#             block= nextBlock
+#             last= block.blockType
+#             nextBlock= Block(last)
+        
+#         keys= pygame.key.get_pressed()
+
+#         if(setState):
+#             frameCount= 3000//t
+#             if(block.checkFloor()):
+#                 if(frameCounter<frameCount):
+#                     frameCounter+=1
+#                     tempBool= checkKeys(keys)
+#                     if(tempBool):
+#                         setState= False
+#                         continue
+#                 else:
+#                     frameCounter= 0
+#                     block.set= True
+#                     blockY= block.y
+#                     for y in block.hbox:
+#                         blockX= block.x
+#                         for x in y:
+#                             if(x==1):
+#                                 field[blockY][blockX]= 1
+#                             blockX+=1
+#                         blockY+=1
+                    
+#                     clear()
+#                     if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
+#                         play= False
+#                     setState= False
+#                     continue
+#             else:
+#                 setState= False
+#                 frameCounter= 0
+#                 continue
+#         else:
+#             if(block.checkFloor()):
+#                 setState= True
+#                 continue
+#             else:
+#                 checkKeys(keys)
+#                 block.y+=1
+#     else:
+#         drawEndScreen()
+
+#     pygame.display.update()
+#     clock.tick(20)
+
+#Testing
+def testKeys(keys):
+    temp= block
+    if(keys[pygame.K_LEFT]):
+        if(block.x != 0):
+            temp.x-=1
+            if(not temp.checkCollide()):
+                block.x-=1
+        return False
+    elif(keys[pygame.K_RIGHT]):
+        if((block.x+len(block.hbox[0])-1) != 9):
+            temp.x+=1
+            if(not temp.checkCollide()):
+                block.x+=1
+        return False
+    elif(keys[pygame.K_DOWN]):
+        while(not block.checkFloor()):
+            block.y+=1
+        block.set= True
+        clear()
+        return True
+    elif(keys[pygame.K_a]):
+        temp.rotate(True)
+        if(not temp.checkCollide()):
+            block.rotate(True)
+        return False
+    elif(keys[pygame.K_s]):
+        temp.rotate(False)
+        if(not temp.checkCollide()):
+            block.rotate(False)
+        return False
+
 while run:
     for event in pygame.event.get():
         if event.type== pygame.QUIT:
             run= False
-
-    if(play):
-        drawWin()
-            
-        if(block.set):
-            block= nextBlock
-            last= block.blockType
-            nextBlock= Block(last)
-        
-        keys= pygame.key.get_pressed()
-
-        if(setState):
-            frameCount= 3000//t
-            if(block.checkFloor()):
-                if(frameCounter<frameCount):
-                    frameCounter+=1
-                    tempBool= checkKeys(keys)
-                    if(tempBool):
-                        setState= False
-                        continue
-                else:
-                    frameCounter= 0
-                    block.set= True
-                    #Adds current block to the field TODO
-                    blockY= block.y
-                    for y in block.hbox:
-                        blockX= block.x
-                        for x in y:
-                            if(x==1):
-                                field[blockY][blockX]= 1
-                            blockX+=1
-                        blockY+=1
-                    
-                    clear()
-                    if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
-                        play= False
-                    setState= False
-                    continue
-            else:
-                setState= False
-                frameCounter= 0
-                continue
-        else:
-            if(block.checkFloor()):
-                setState= True
-                continue
-            else:
-                checkKeys(keys)
-                block.y+=1
-    else:
-        drawEndScreen()
-
+    keys= pygame.key.get_pressed()
+    testKeys(keys)
     pygame.display.update()
     clock.tick(20)
 
