@@ -1,8 +1,9 @@
 '''
 Notes:
-- Might have fixed a collision error, but still may need to rework rot system
+- Collision errors occur because the temp block is not calling the same hitbox as the current block,
+  this occurs because a block may have a rotated hitbox, but the temp block calls a non rotated hitbox from the dict
+- REWORKING ROT SYSTEM CHECK THAT ALL FUNCTIONS WORK
 - Need to change levelling speeds
-- Possibly rework speed system completely
 - Consider adding different colors to the blocks
 '''
 
@@ -29,13 +30,108 @@ font= pygame.font.SysFont('arial', 15)
 
 
 hitboxes= {
-    '0':[[1, 1, 1, 1]],
-    '1':[[0, 1, 0], [1, 1, 1]],
-    '2':[[0, 1, 1], [1, 1, 0]],
-    '3':[[1, 1, 0], [0, 1, 1]],
-    '4':[[1, 1], [1, 1]],
-    '5':[[0, 0, 1], [1, 1, 1]],
-    '6':[[1, 0, 0], [1, 1, 1]],
+    '(0,0)': [[0, 0, 0, 0], 
+              [1, 1, 1, 1], 
+              [0, 0, 0, 0], 
+              [0, 0, 0, 0]]
+
+    '(0,1)': [[0, 0, 1, 0], 
+              [0, 0, 1, 0], 
+              [0, 0, 1, 0], 
+              [0, 0, 1, 0]]
+
+    '(0,2)': [[0, 0, 0, 0],
+              [0, 0, 0, 0], 
+              [1, 1, 1, 1],
+              [0, 0, 0, 0]]
+
+    '(0,3)': [[0, 1, 0, 0], 
+              [0, 1, 0, 0], 
+              [0, 1, 0, 0], 
+              [0, 1, 0, 0]]
+
+    '(1,0)': [[1, 0, 0],
+              [1, 1, 1],
+              [0, 0, 0]]
+
+    '(1,1)': [[0, 1, 1],
+              [0, 1, 0],
+              [0, 1, 0]]
+
+    '(1,2)': [[0, 0, 0],
+              [1, 1, 1],
+              [0, 0, 1]]
+
+    '(1,3)': [[0, 1, 0],
+              [0, 1, 0],
+              [1, 1, 0]]
+
+    '(2,0)': [[0, 0, 1],
+              [1, 1, 1],
+              [0, 0, 0]]
+
+    '(2,1)': [[0, 1, 0],
+              [0, 1, 0],
+              [0, 1, 1]]
+
+    '(2,2)': [[0, 0, 0],
+              [1, 1, 1],
+              [1, 0, 0]]
+
+    '(2,3)': [[1, 1, 0],
+              [0, 1, 0],
+              [0, 1, 0]]
+
+    '(3,0)': [[0, 1, 0],
+              [1, 1, 1],
+              [0, 0, 0]]
+
+    '(3,1)': [[0, 1, 0],
+              [0, 1, 1],
+              [0, 1, 0]]
+
+    '(3,2)': [[0, 0, 0],
+              [1, 1, 1],
+              [0, 1, 0]]
+
+    '(3,3)': [[0, 1, 0],
+              [1, 1, 0],
+              [0, 1, 0]]
+
+    '(4,0)': [[1, 1],
+              [1, 1]]
+
+    '(5,0)': [[0, 1, 1],
+              [1, 1, 0],
+              [0, 0, 0]]
+
+    '(5,1)': [[0, 1, 0],
+              [0, 1, 1],
+              [0, 0, 1]]
+
+    '(5,2)': [[0, 0, 0],
+              [0, 1, 1],
+              [1, 1, 0]]
+
+    '(5,3)': [[1, 0, 0],
+              [1, 1, 0],
+              [0, 1, 0]]
+
+    '(6,0)': [[1, 1, 0],
+              [0, 1, 1],
+              [0, 0, 0]]
+
+    '(6,1)': [[0, 0, 1],
+              [0, 1, 1],
+              [0, 1, 0]]
+
+    '(6,2)': [[0, 0, 0],
+              [1, 1, 0],
+              [0, 1, 1]]
+
+    '(6,3)': [[0, 1, 0],
+              [1, 1, 0],
+              [1, 0, 0]]
 }
 
 def setSpeed(): 
@@ -117,6 +213,9 @@ def drawWin():
     tempY= 40
     for y in range(2, len(field)):
         tempX= 10
+        if(field[y].count(1)==0):
+            tempY+=blockSize
+            continue
         for x in field[y]:
             if(x==1):
                 win.fill((255, 255, 255), (tempX, tempY, blockSize, blockSize))
@@ -130,13 +229,16 @@ def drawWin():
     if(block.y>1):
         for y in range(len(block.hbox)):
             blockX= 10+(block.x)*blockSize
+            if(block.hbox[y].count(1)==0):
+                blockY+=blockSize
+                continue
             for x in block.hbox[y]:
                 if(x==1):
                     win.fill((255, 255, 255), (blockX, blockY, blockSize, blockSize))
-                if(block.checkCollide()):
-                    pygame.draw.rect(win, (255, 0, 0), (blockX, blockY, blockSize, blockSize), 5)
-                else:
-                    pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
+                    if(block.checkCollide()):
+                        pygame.draw.rect(win, (255, 0, 0), (blockX, blockY, blockSize, blockSize), 5)
+                    else:
+                        pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
                 blockX+=blockSize
             blockY+=blockSize
 
@@ -159,15 +261,25 @@ def checkKeys(keys):
     temp.hbox= hitboxes[str(block.blockType)]
 
     if(keys[pygame.K_LEFT]):
-        if(block.x != 0):
+        if(not block.checkSide(True)):
             temp.x-=1
             if(not temp.checkCollide()):
                 block.x-=1
     elif(keys[pygame.K_RIGHT]):
-        if((block.x+len(block.hbox[0])-1) != 9):
+        if(not block.checkSide(False)):
             temp.x+=1
             if(not temp.checkCollide()):
                 block.x+=1
+
+    #Testing
+    elif(keys[pygame.K_UP]):
+        temp.y-=1
+        if(not temp.checkCollide()):
+            block.y-=1
+    elif(keys[pygame.K_DOWN]):
+        temp.y+=1
+        if(not temp.checkCollide()):
+            block.y+=1
 
 def checkEvent():
     global run
@@ -180,12 +292,12 @@ def checkEvent():
         if event.type== pygame.QUIT:
             run= False
         elif(event.type== pygame.KEYDOWN):
-            if(event.key== pygame.K_DOWN):
-                while(not block.checkFloor()):
-                    block.y+=1
-                block.set= True
-                return True
-            elif(event.key== pygame.K_a):
+            # if(event.key== pygame.K_DOWN):
+            #     while(not block.checkFloor()):
+            #         block.y+=1
+            #     block.set= True
+            #     return True
+            if(event.key== pygame.K_a):
                 temp.rotate(True)
                 if(not temp.checkCollide()):
                     block.rotate(True)
@@ -211,63 +323,51 @@ def setBlock():
 class Block:
     def __init__(self, last):
         self.blockType= blockTypeInit(last)
-        self.hbox= hitboxes[str(self.blockType)]
+        self.rotPos= 0
+        self.hbox= hitboxes[str((self.blockType, self.rotPos))]
         self.set= False
         self.x= 3
-        if(self.blockType== 0):
-            self.y=1
-        else:
-            self.y= 0
+        self.y= 0
         self.rotCoords= (None, None)
         global field
 
-    def checkFloor(self): 
+    def checkFloor(self): #TODO
         floorY= self.y+len(self.hbox)-1
         if(floorY== 21):
             return True
         blockX= 0
         for x in range(self.x, self.x+len(self.hbox[0])):
-            if(self.hbox[-1][blockX]==1 and field[floorY+1][x]):
+            if(self.hbox[-1][blockX]==1 and field[floorY+1][x]): #ERROR
                 return True
             blockX+=1
         return False
 
-    def rotate(self, ccw):
-        if(self.rotCoords[0]!= None):
-            self.x, self.y= [self.rotCoords[0], self.rotCoords[1]]
-            self.rotCoords= (None, None)
-        if(self.blockType!= 4):
-            temp= []
+    def rotate(self, ccw): #TODO rot coord system
+        if(self.blockType!=4 and (self.y!= 0)):
             if(ccw):
-                for col in range(len(self.hbox[0])-1, -1, -1):
-                    colTemp= []
-                    for row in range(len(self.hbox)):
-                        colTemp.append(self.hbox[row][col])
-                    temp.append(colTemp)
-            else:
-                for col in range(len(self.hbox[0])):
-                    colTemp= []
-                    for row in range(len(self.hbox)-1, -1, -1):
-                        colTemp.append(self.hbox[row][col])
-                    temp.append(colTemp)
-            self.hbox= temp
-            if(self.x+len(self.hbox[0])-1>9 and self.y+len(self.hbox)-1>21):
-                self.rotCoords= (self.x, self.y)
-                while(self.x+len(self.hbox[0])-1>9):
-                    self.x-=1
-                while(self.y+len(self.hbox)-1>21):
-                    self.y-=1
+                self.rotPos-=1
+                if(self.rotPos<0):
+                    self.rotPos= 3
+            else: #ie clockwise
+                self.rotPos+=1
+                if(self.rotPos>3):
+                    self.rotPos= 0
+            self.hbox= hitboxes[str((self.blockType, self.rotPos))]
 
     def checkCollide(self):
         blockY= self.y 
         for y in self.hbox:
             blockX= self.x
             for x in y:
-                if(field[blockY][blockX]==1 and x==1): #Error
+                if(field[blockY][blockX]==1 and x==1): #ERROR
                     return True
                 blockX+=1
             blockY+=1
         return False
+    
+    def checkSide(self, left): #TODO
+        if(left):
+        else:
 
 block= Block(None)
 last= block.blockType
@@ -337,48 +437,11 @@ field[10][4]= 1
 block.blockType= 0
 block.hbox= hitboxes[str(0)]
 
-def testKeys(keys):
-    temp= Block(None)
-    temp.x= block.x
-    temp.y= block.y
-    temp.hbox= hitboxes[str(block.blockType)]
-
-    if(keys[pygame.K_LEFT]): #Goes through left bound
-        if(block.x-1 >= 0):
-            temp.x-=1
-            if(not temp.checkCollide()):
-                block.x-=1
-        return False
-    elif(keys[pygame.K_RIGHT]):
-        if((block.x+len(block.hbox[0])) <= 9):
-            block.x+=1
-        return False
-    elif(keys[pygame.K_DOWN]):
-        if((block.y+ len(block.hbox)-1) != 21):
-            block.y+=1
-        return True
-    elif(keys[pygame.K_UP]):
-        if(block.y!= 0):
-            block.y-=1
-        return False
-    elif(keys[pygame.K_a]):
-        temp.rotate(True)
-        if(not temp.checkCollide()):
-            block.rotate(True)
-        return False
-    elif(keys[pygame.K_s]):
-        temp.rotate(False)
-        if(not temp.checkCollide()):
-            block.rotate(False)
-        return False
-
 while run:
     drawWin()
-    for event in pygame.event.get():
-        if event.type== pygame.QUIT:
-            run= False
     keys= pygame.key.get_pressed()
-    testKeys(keys)
+    checkKeys(keys)
+    checkEvent()
     pygame.display.update()
     clock.tick(20)
 
