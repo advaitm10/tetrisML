@@ -1,11 +1,9 @@
 '''
 Notes:
-- Collision errors occur because the temp block is not calling the same hitbox as the current block,
-  this occurs because a block may have a rotated hitbox, but the temp block calls a non rotated hitbox from the dict
-- REWORKING ROT SYSTEM CHECK THAT ALL FUNCTIONS WORK
 - Need to change levelling speeds
 - Consider adding different colors to the blocks
-- Check side appears to work
+- Finish wallkick implementation, incllude collision check within rot func
+- Update check collide to check out of bounds
 '''
 
 blockSize= 20
@@ -133,6 +131,28 @@ hitboxes= {
     (6,3): [[0, 1, 0],
             [1, 1, 0],
             [1, 0, 0]]
+}
+
+wallKick= {
+    (0, 1):[(0,0), (-1,0), (-1,1), (0,-2), (-1,-2)],
+    (1, 0):[(0,0), (1,0), (1,-1), (0,2), (1,2)],
+    (1, 2):[(0,0), (1,0), (1,-1), (0,2), (1,2)],
+    (2, 1):[(0,0), (-1,0), (-1,1), (0,-2), (-1,-2)],
+    (2, 3):[(0,0), (1,0), (1,1), (0,-2), (1,-2)],
+    (3, 2):[(0,0), (-1,0), (-1,-1), (0,2), (-1,2)],
+    (3, 0):[(0,0), (-1,0), (-1,-1), (0,2), (-1,2)],
+    (0, 3):[(0,0), (1,0), (1,1), (0,-2), (1,-2)]
+}
+
+wallKickLong= {
+    (0, 1):[(0,0), (-2,0), (1,0), (-2,-1), (1,2)],
+    (1, 0):[(0,0), (2,0), (-1,0), (2,1), (-1,-2)],
+    (1, 2):[(0,0), (-1,0), (2,0), (-1,2), (2,-1)],
+    (2, 1):[(0,0), (1,0), (-2,0), (1,-2), (-2,1)],
+    (2, 3):[(0,0), (2,0), (-1,0), (2,1), (-1,-2)],
+    (3, 2):[(0,0), (-2,0), (1,0), (-2,-1), (1,2)],
+    (3, 0):[(0,0), (1,0), (-2,0), (1,-2), (-2,1)],
+    (0, 3):[(0,0), (-1,0), (2,0), (-1,2), (2,-1)]
 }
 
 def setSpeed(): 
@@ -299,14 +319,10 @@ def checkEvent():
             #     block.set= True
             #     return True
             if(event.key== pygame.K_a):
-                temp.rotate(True)
-                if(not temp.checkCollide()):
-                    block.rotate(True)
+                block.rotate(True)
                 return False
             elif(event.key== pygame.K_s):
-                temp.rotate(False)
-                if(not temp.checkCollide()):
-                    block.rotate(False)
+                block.rotate(False)
                 return False
 
 def setBlock():
@@ -329,7 +345,6 @@ class Block:
         self.set= False
         self.x= 3
         self.y= 0
-        self.rotCoords= (None, None)
         global field
 
     def checkFloor(self):
@@ -352,7 +367,7 @@ class Block:
 
         return False
 
-    def rotate(self, ccw): #TODO rot coord system
+    def rotate(self, ccw): #TODO wall kick
         if(self.blockType!=4 and (self.y!= 0)):
             if(ccw):
                 self.rotPos-=1
@@ -363,6 +378,7 @@ class Block:
                 if(self.rotPos>3):
                     self.rotPos= 0
             self.hbox= hitboxes[(self.blockType, self.rotPos)]
+
 
     def checkCollide(self):
         blockY= self.y 
