@@ -5,6 +5,7 @@ Notes:
 - REWORKING ROT SYSTEM CHECK THAT ALL FUNCTIONS WORK
 - Need to change levelling speeds
 - Consider adding different colors to the blocks
+- Make sure check side works
 '''
 
 blockSize= 20
@@ -30,108 +31,108 @@ font= pygame.font.SysFont('arial', 15)
 
 
 hitboxes= {
-    '(0,0)': [[0, 0, 0, 0], 
-              [1, 1, 1, 1], 
-              [0, 0, 0, 0], 
-              [0, 0, 0, 0]]
+    (0,0): [[0, 0, 0, 0], 
+            [1, 1, 1, 1], 
+            [0, 0, 0, 0], 
+            [0, 0, 0, 0]],
 
-    '(0,1)': [[0, 0, 1, 0], 
-              [0, 0, 1, 0], 
-              [0, 0, 1, 0], 
-              [0, 0, 1, 0]]
+    (0,1): [[0, 0, 1, 0], 
+            [0, 0, 1, 0], 
+            [0, 0, 1, 0], 
+            [0, 0, 1, 0]],
 
-    '(0,2)': [[0, 0, 0, 0],
-              [0, 0, 0, 0], 
-              [1, 1, 1, 1],
-              [0, 0, 0, 0]]
+    (0,2): [[0, 0, 0, 0],
+            [0, 0, 0, 0], 
+            [1, 1, 1, 1],
+            [0, 0, 0, 0]],
 
-    '(0,3)': [[0, 1, 0, 0], 
-              [0, 1, 0, 0], 
-              [0, 1, 0, 0], 
-              [0, 1, 0, 0]]
+    (0,3): [[0, 1, 0, 0], 
+            [0, 1, 0, 0], 
+            [0, 1, 0, 0], 
+            [0, 1, 0, 0]],
 
-    '(1,0)': [[1, 0, 0],
-              [1, 1, 1],
-              [0, 0, 0]]
+    (1,0): [[1, 0, 0],
+            [1, 1, 1],
+            [0, 0, 0]],
 
-    '(1,1)': [[0, 1, 1],
-              [0, 1, 0],
-              [0, 1, 0]]
+    (1,1): [[0, 1, 1],
+            [0, 1, 0],
+            [0, 1, 0]],
 
-    '(1,2)': [[0, 0, 0],
-              [1, 1, 1],
-              [0, 0, 1]]
+    (1,2): [[0, 0, 0],
+            [1, 1, 1],
+            [0, 0, 1]],
 
-    '(1,3)': [[0, 1, 0],
-              [0, 1, 0],
-              [1, 1, 0]]
+    (1,3): [[0, 1, 0],
+            [0, 1, 0],
+            [1, 1, 0]],
 
-    '(2,0)': [[0, 0, 1],
-              [1, 1, 1],
-              [0, 0, 0]]
+    (2,0): [[0, 0, 1],
+            [1, 1, 1],
+            [0, 0, 0]],
 
-    '(2,1)': [[0, 1, 0],
-              [0, 1, 0],
-              [0, 1, 1]]
+    (2,1): [[0, 1, 0],
+            [0, 1, 0],
+            [0, 1, 1]],
 
-    '(2,2)': [[0, 0, 0],
-              [1, 1, 1],
-              [1, 0, 0]]
+    (2,2): [[0, 0, 0],
+            [1, 1, 1],
+            [1, 0, 0]],
 
-    '(2,3)': [[1, 1, 0],
-              [0, 1, 0],
-              [0, 1, 0]]
+    (2,3): [[1, 1, 0],
+            [0, 1, 0],
+            [0, 1, 0]],
 
-    '(3,0)': [[0, 1, 0],
-              [1, 1, 1],
-              [0, 0, 0]]
+    (3,0): [[0, 1, 0],
+            [1, 1, 1],
+            [0, 0, 0]],
 
-    '(3,1)': [[0, 1, 0],
-              [0, 1, 1],
-              [0, 1, 0]]
+    (3,1): [[0, 1, 0],
+            [0, 1, 1],
+            [0, 1, 0]],
 
-    '(3,2)': [[0, 0, 0],
-              [1, 1, 1],
-              [0, 1, 0]]
+    (3,2): [[0, 0, 0],
+            [1, 1, 1],
+            [0, 1, 0]],
 
-    '(3,3)': [[0, 1, 0],
-              [1, 1, 0],
-              [0, 1, 0]]
+    (3,3): [[0, 1, 0],
+            [1, 1, 0],
+            [0, 1, 0]],
 
-    '(4,0)': [[1, 1],
-              [1, 1]]
+    (4,0): [[1, 1],
+            [1, 1]],
 
-    '(5,0)': [[0, 1, 1],
-              [1, 1, 0],
-              [0, 0, 0]]
+    (5,0): [[0, 1, 1],
+            [1, 1, 0],
+            [0, 0, 0]],
 
-    '(5,1)': [[0, 1, 0],
-              [0, 1, 1],
-              [0, 0, 1]]
+    (5,1): [[0, 1, 0],
+            [0, 1, 1],
+            [0, 0, 1]],
 
-    '(5,2)': [[0, 0, 0],
-              [0, 1, 1],
-              [1, 1, 0]]
+    (5,2): [[0, 0, 0],
+            [0, 1, 1],
+            [1, 1, 0]],
 
-    '(5,3)': [[1, 0, 0],
-              [1, 1, 0],
-              [0, 1, 0]]
+    (5,3): [[1, 0, 0],
+            [1, 1, 0],
+            [0, 1, 0]],
 
-    '(6,0)': [[1, 1, 0],
-              [0, 1, 1],
-              [0, 0, 0]]
+    (6,0): [[1, 1, 0],
+            [0, 1, 1],
+            [0, 0, 0]],
 
-    '(6,1)': [[0, 0, 1],
-              [0, 1, 1],
-              [0, 1, 0]]
+    (6,1): [[0, 0, 1],
+            [0, 1, 1],
+            [0, 1, 0]],
 
-    '(6,2)': [[0, 0, 0],
-              [1, 1, 0],
-              [0, 1, 1]]
+    (6,2): [[0, 0, 0],
+            [1, 1, 0],
+            [0, 1, 1]],
 
-    '(6,3)': [[0, 1, 0],
-              [1, 1, 0],
-              [1, 0, 0]]
+    (6,3): [[0, 1, 0],
+            [1, 1, 0],
+            [1, 0, 0]]
 }
 
 def setSpeed(): 
@@ -235,7 +236,7 @@ def drawWin():
             for x in block.hbox[y]:
                 if(x==1):
                     win.fill((255, 255, 255), (blockX, blockY, blockSize, blockSize))
-                    if(block.checkCollide()):
+                    if(block.checkFloor()):
                         pygame.draw.rect(win, (255, 0, 0), (blockX, blockY, blockSize, blockSize), 5)
                     else:
                         pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
@@ -258,7 +259,7 @@ def checkKeys(keys):
     temp= Block(None)
     temp.x= block.x
     temp.y= block.y
-    temp.hbox= hitboxes[str(block.blockType)]
+    temp.hbox= hitboxes[(block.blockType, block.rotPos)]
 
     if(keys[pygame.K_LEFT]):
         if(not block.checkSide(True)):
@@ -286,7 +287,7 @@ def checkEvent():
     temp= Block(None)
     temp.x= block.x
     temp.y= block.y
-    temp.hbox= hitboxes[str(block.blockType)]
+    temp.hbox= hitboxes[(block.blockType, block.rotPos)]
 
     for event in pygame.event.get():
         if event.type== pygame.QUIT:
@@ -324,22 +325,31 @@ class Block:
     def __init__(self, last):
         self.blockType= blockTypeInit(last)
         self.rotPos= 0
-        self.hbox= hitboxes[str((self.blockType, self.rotPos))]
+        self.hbox= hitboxes[(self.blockType, self.rotPos)]
         self.set= False
         self.x= 3
         self.y= 0
         self.rotCoords= (None, None)
         global field
 
-    def checkFloor(self): #TODO
-        floorY= self.y+len(self.hbox)-1
+    def checkFloor(self):
+        blockY= 0
+        for y in range(len(self.hbox)-1, -1, -1):
+            if(self.hbox[y].count(1)>0):
+                blockY= y
+                break
+        
+        floorY= blockY+self.y
+
         if(floorY== 21):
             return True
-        blockX= 0
-        for x in range(self.x, self.x+len(self.hbox[0])):
-            if(self.hbox[-1][blockX]==1 and field[floorY+1][x]): #ERROR
+
+        blockX= self.x
+        for x in self.hbox[blockY]:
+            if(x==1 and field[floorY+1][blockX]==1):
                 return True
             blockX+=1
+
         return False
 
     def rotate(self, ccw): #TODO rot coord system
@@ -366,8 +376,43 @@ class Block:
         return False
     
     def checkSide(self, left): #TODO
+        temp= False
         if(left):
+            for x in range(len(self.hbox[0])):
+                for y in range(len(self.hbox)):
+                    if(self.hbox[y][x]==1):
+                        sideX= x
+                        temp= True
+                        break
+                if(temp):
+                    break
+
+            fieldX= sideX+self.x
+            if(fieldX==0):
+                 return True
+
+            for y in range(len(self.hbox)):
+                if(self.hbox[y][sideX]==1 and field[self.y+y][fieldX-1]==1):
+                    return True
         else:
+            for x in range(len(self.hbox[0])-1, -1, -1):
+                for y in range(len(self.hbox)):
+                    if(self.hbox[y][x]==1):
+                        sideX= x
+                        temp= True
+                        break
+                if(temp):
+                    break
+            
+            fieldX= sideX+self.x
+            if(fieldX==9):
+                return True
+
+            for y in range(len(self.hbox)):
+                if(self.hbox[y][sideX]==1 and field[self.y+y][fieldX+1]==1):
+                    return True
+
+        return False
 
 block= Block(None)
 last= block.blockType
@@ -435,7 +480,7 @@ field[9][4]= 1
 field[10][4]= 1
 
 block.blockType= 0
-block.hbox= hitboxes[str(0)]
+block.hbox= hitboxes[(0,0)]
 
 while run:
     drawWin()
