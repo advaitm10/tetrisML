@@ -5,7 +5,7 @@ Notes:
 - REWORKING ROT SYSTEM CHECK THAT ALL FUNCTIONS WORK
 - Need to change levelling speeds
 - Consider adding different colors to the blocks
-- Make sure check side works
+- Check side appears to work
 '''
 
 blockSize= 20
@@ -236,7 +236,7 @@ def drawWin():
             for x in block.hbox[y]:
                 if(x==1):
                     win.fill((255, 255, 255), (blockX, blockY, blockSize, blockSize))
-                    if(block.checkFloor()):
+                    if(block.checkSide(True) or block.checkSide(False)):
                         pygame.draw.rect(win, (255, 0, 0), (blockX, blockY, blockSize, blockSize), 5)
                     else:
                         pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
@@ -362,20 +362,20 @@ class Block:
                 self.rotPos+=1
                 if(self.rotPos>3):
                     self.rotPos= 0
-            self.hbox= hitboxes[str((self.blockType, self.rotPos))]
+            self.hbox= hitboxes[(self.blockType, self.rotPos)]
 
     def checkCollide(self):
         blockY= self.y 
         for y in self.hbox:
             blockX= self.x
             for x in y:
-                if(field[blockY][blockX]==1 and x==1): #ERROR
+                if(field[blockY][blockX]==1 and x==1):
                     return True
                 blockX+=1
             blockY+=1
         return False
     
-    def checkSide(self, left): #TODO
+    def checkSide(self, left):
         temp= False
         if(left):
             for x in range(len(self.hbox[0])):
