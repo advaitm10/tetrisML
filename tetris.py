@@ -279,7 +279,9 @@ def checkKeys(keys):
     temp= Block(None)
     temp.x= block.x
     temp.y= block.y
-    temp.hbox= hitboxes[(block.blockType, block.rotPos)]
+    temp.hbox= hitboxes[(block.blockType, block.rotPos)][0]
+    temp.dims= hitboxes[(block.blockType, block.rotPos)][1]
+    temp.displace= hitboxes[(block.blockType, block.rotPos)][2]
 
     if(keys[pygame.K_LEFT]):
         if(not block.checkSide(True)):
@@ -307,7 +309,9 @@ def checkEvent():
     temp= Block(None)
     temp.x= block.x
     temp.y= block.y
-    temp.hbox= hitboxes[(block.blockType, block.rotPos)]
+    temp.hbox= hitboxes[(block.blockType, block.rotPos)][0]
+    temp.dims= hitboxes[(block.blockType, block.rotPos)][1]
+    temp.displace= hitboxes[(block.blockType, block.rotPos)][2]
 
     for event in pygame.event.get():
         if event.type== pygame.QUIT:
@@ -341,7 +345,9 @@ class Block:
     def __init__(self, last):
         self.blockType= blockTypeInit(last)
         self.rotPos= 0
-        self.hbox= hitboxes[(self.blockType, self.rotPos)]
+        self.hbox= hitboxes[(self.blockType, self.rotPos)][0]
+        self.dims= hitboxes[(self.blockType, self.rotPos)][1]
+        self.displace= hitboxes[(self.blockType, self.rotPos)][2]
         self.set= False
         self.x= 3
         self.y= 0
@@ -381,6 +387,7 @@ class Block:
 
 
     def checkCollide(self):
+        if()
         blockY= self.y 
         for y in self.hbox:
             blockX= self.x
