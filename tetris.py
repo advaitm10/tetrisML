@@ -1,9 +1,8 @@
 '''
 Notes:
-- Need to change levelling speeds
-- Consider adding different colors to the blocks
-- Finish wallkick implementation, incllude collision check within rot func
-- Update check collide to check out of bounds
+- Blocks phase, not necessarily due to rotations
+- Blocks cant slide off floors
+- Checkfloor might be busted
 '''
 
 blockSize= 20
@@ -256,10 +255,7 @@ def drawWin():
             for x in block.hbox[y]:
                 if(x==1):
                     win.fill((255, 255, 255), (blockX, blockY, blockSize, blockSize))
-                    if(block.checkSide(True) or block.checkSide(False)):
-                        pygame.draw.rect(win, (255, 0, 0), (blockX, blockY, blockSize, blockSize), 5)
-                    else:
-                        pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
+                    pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
                 blockX+=blockSize
             blockY+=blockSize
 
@@ -284,25 +280,25 @@ def checkKeys(keys):
     temp.displace= hitboxes[(block.blockType, block.rotPos)][2]
 
     if(keys[pygame.K_LEFT]):
-        if(not block.checkSide(True)):
-            temp.x-=1
-            if(not temp.checkCollide()):
-                block.x-=1
+        # if(not block.checkSide(True)):
+        temp.x-=1
+        if(not temp.checkCollide()):
+            block.x-=1
     elif(keys[pygame.K_RIGHT]):
-        if(not block.checkSide(False)):
-            temp.x+=1
-            if(not temp.checkCollide()):
-                block.x+=1
+        # if(not block.checkSide(False)):
+        temp.x+=1
+        if(not temp.checkCollide()):
+            block.x+=1
 
     #Testing
-    elif(keys[pygame.K_UP]):
-        temp.y-=1
-        if(not temp.checkCollide()):
-            block.y-=1
-    elif(keys[pygame.K_DOWN]):
-        temp.y+=1
-        if(not temp.checkCollide()):
-            block.y+=1
+    # elif(keys[pygame.K_UP]):
+    #     temp.y-=1
+    #     if(not temp.checkCollide()):
+    #         block.y-=1
+    # elif(keys[pygame.K_DOWN]):
+    #     temp.y+=1
+    #     if(not temp.checkCollide()):
+    #         block.y+=1
 
 def checkEvent():
     global run
@@ -317,11 +313,11 @@ def checkEvent():
         if event.type== pygame.QUIT:
             run= False
         elif(event.type== pygame.KEYDOWN):
-            # if(event.key== pygame.K_DOWN):
-            #     while(not block.checkFloor()):
-            #         block.y+=1
-            #     block.set= True
-            #     return True
+            if(event.key== pygame.K_DOWN):
+                while(not block.checkFloor()):
+                    block.y+=1
+                block.set= True
+                return True
             if(event.key== pygame.K_a):
                 block.rotate(True)
                 return False
@@ -354,6 +350,7 @@ class Block:
         global field
 
     def checkFloor(self):
+        #Find lowest line in hbox 
         blockY= 0
         for y in range(len(self.hbox)-1, -1, -1):
             if(self.hbox[y].count(1)>0):
@@ -374,6 +371,10 @@ class Block:
         return False
 
     def rotate(self, ccw): #TODO wall kick
+        lastRot= self.rotPos
+        ogX= self.x
+        ogY= self.y
+        temp= False
         if(self.blockType!=4 and (self.y!= 0)):
             if(ccw):
                 self.rotPos-=1
@@ -383,11 +384,43 @@ class Block:
                 self.rotPos+=1
                 if(self.rotPos>3):
                     self.rotPos= 0
-            self.hbox= hitboxes[(self.blockType, self.rotPos)]
+            self.hbox= hitboxes[(self.blockType, self.rotPos)][0]
+            self.dims= hitboxes[(self.blockType, self.rotPos)][1]
+            self.displace= hitboxes[(self.blockType, self.rotPos)][2]
+        #Wall kick
+        if(self.blockType== 0):
+            for i in wallKickLong[(lastRot, self.rotPos)]:
+                ogX+=i[0]
+                ogY+= i[1]
+                if(not self.checkCollide()):
+                    self.x= ogX
+                    self.y= ogY
+                    temp= True
+                    break
+                ogX= self.x
+                ogY= self.y
+                
+        else:
+            for i in wallKick[(lastRot, self.rotPos)]:
+                ogX+=i[0]
+                ogY+= i[1]
+                if(not self.checkCollide()):
+                    self.x= ogX
+                    self.y= ogY
+                    temp= True
+                    break
+                ogX= self.x
+                ogY= self.y
 
+        if(not temp):
+            self.rotPos= lastRot
+            self.hbox= hitboxes[(self.blockType, self.rotPos)][0]
+            self.dims= hitboxes[(self.blockType, self.rotPos)][1]
+            self.displace= hitboxes[(self.blockType, self.rotPos)][2]
 
     def checkCollide(self):
-        if()
+        if((self.x+self.displace[0]+self.dims[0]-1>9 or self.x<0) or self.y+self.displace[1]+self.dims[1]>21):
+            return True
         blockY= self.y 
         for y in self.hbox:
             blockX= self.x
@@ -398,120 +431,120 @@ class Block:
             blockY+=1
         return False
     
-    def checkSide(self, left):
-        temp= False
-        if(left):
-            for x in range(len(self.hbox[0])):
-                for y in range(len(self.hbox)):
-                    if(self.hbox[y][x]==1):
-                        sideX= x
-                        temp= True
-                        break
-                if(temp):
-                    break
+    # def checkSide(self, left):
+    #     temp= False
+    #     if(left):
+    #         for x in range(len(self.hbox[0])):
+    #             for y in range(len(self.hbox)):
+    #                 if(self.hbox[y][x]==1):
+    #                     sideX= x
+    #                     temp= True
+    #                     break
+    #             if(temp):
+    #                 break
 
-            fieldX= sideX+self.x
-            if(fieldX==0):
-                 return True
+    #         fieldX= sideX+self.x
+    #         if(fieldX==0):
+    #              return True
 
-            for y in range(len(self.hbox)):
-                if(self.hbox[y][sideX]==1 and field[self.y+y][fieldX-1]==1):
-                    return True
-        else:
-            for x in range(len(self.hbox[0])-1, -1, -1):
-                for y in range(len(self.hbox)):
-                    if(self.hbox[y][x]==1):
-                        sideX= x
-                        temp= True
-                        break
-                if(temp):
-                    break
+    #         for y in range(len(self.hbox)):
+    #             if(self.hbox[y][sideX]==1 and field[self.y+y][fieldX-1]==1):
+    #                 return True
+    #     else:
+    #         for x in range(len(self.hbox[0])-1, -1, -1):
+    #             for y in range(len(self.hbox)):
+    #                 if(self.hbox[y][x]==1):
+    #                     sideX= x
+    #                     temp= True
+    #                     break
+    #             if(temp):
+    #                 break
             
-            fieldX= sideX+self.x
-            if(fieldX==9):
-                return True
+    #         fieldX= sideX+self.x
+    #         if(fieldX==9):
+    #             return True
 
-            for y in range(len(self.hbox)):
-                if(self.hbox[y][sideX]==1 and field[self.y+y][fieldX+1]==1):
-                    return True
+    #         for y in range(len(self.hbox)):
+    #             if(self.hbox[y][sideX]==1 and field[self.y+y][fieldX+1]==1):
+    #                 return True
 
-        return False
+    #     return False
 
 block= Block(None)
 last= block.blockType
 nextBlock= Block(last)
 
-# while run:
+while run:
 
-#     if(play):
-#         drawWin()
+    if(play):
+        drawWin()
             
-#         if(block.set):
-#             block= nextBlock
-#             last= block.blockType
-#             nextBlock= Block(last)
+        if(block.set):
+            block= nextBlock
+            last= block.blockType
+            nextBlock= Block(last)
         
-#         keys= pygame.key.get_pressed()
+        keys= pygame.key.get_pressed()
 
-#         if(setState):
-#             frameCount= 1500//t
-#             if(block.checkFloor()):
-#                 if(frameCounter<frameCount):
-#                     frameCounter+=1
-#                     checkKeys(keys)
-#                     tempBool= checkEvent()
-#                     if(tempBool):
-#                         setBlock()
-#                         if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
-#                             play= False
-#                         setState= False
-#                         continue
-#                 else:
-#                     frameCounter= 0
-#                     block.set= True
-#                     setBlock()
-#                     if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
-#                         play= False
-#                     setState= False
-#                     continue
-#             else:
-#                 setState= False
-#                 frameCounter= 0
-#                 continue
-#         else:
-#             if(block.checkFloor()):
-#                 setState= True
-#                 continue
-#             else:
-#                 checkKeys(keys)
-#                 tempBool= checkEvent()
-#                 if(tempBool):
-#                     setBlock()
-#                 if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
-#                     play= False
-#                 block.y+=1
-#     else:
-#         drawEndScreen()
+        if(setState):
+            frameCount= 1500//t
+            if(block.checkFloor()):
+                if(frameCounter<frameCount):
+                    frameCounter+=1
+                    checkKeys(keys)
+                    tempBool= checkEvent()
+                    if(tempBool):
+                        setBlock()
+                        if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
+                            play= False
+                        setState= False
+                        continue
+                else:
+                    frameCounter= 0
+                    block.set= True
+                    setBlock()
+                    if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
+                        play= False
+                    setState= False
+                    continue
+            else:
+                setState= False
+                frameCounter= 0
+                continue
+        else:
+            if(block.checkFloor()):
+                setState= True
+                continue
+            else:
+                checkKeys(keys)
+                tempBool= checkEvent()
+                if(tempBool):
+                    setBlock()
+                if(field[0].count(1)>0 or field[1].count(1)>0): #checks if game is over
+                    play= False
+                block.y+=1
+    else:
+        drawEndScreen()
 
-#     pygame.display.update()
-#     clock.tick(10)
+    pygame.display.update()
+    clock.tick(10)
 
 #Testing
-field[9][5]= 1
-field[10][5]= 1
-field[9][4]= 1
-field[10][4]= 1
+# field[9][5]= 1
+# field[10][5]= 1
+# field[9][4]= 1
+# field[10][4]= 1
 
-block.blockType= 0
-block.hbox= hitboxes[(0,0)]
+# block.blockType= 0
+# block.hbox= hitboxes[(0,0)]
 
-while run:
-    drawWin()
-    keys= pygame.key.get_pressed()
-    checkKeys(keys)
-    checkEvent()
-    pygame.display.update()
-    clock.tick(20)
+# while run:
+#     drawWin()
+#     keys= pygame.key.get_pressed()
+#     checkKeys(keys)
+#     checkEvent()
+#     pygame.display.update()
+#     clock.tick(20)
 
 pygame.quit()
 sys.exit()
