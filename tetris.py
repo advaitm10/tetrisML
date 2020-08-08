@@ -1,6 +1,6 @@
 '''
 Notes:
-- implement speed change
+- Maybe adjust fps, cuz its too fast rn
 '''
 
 blockSize= 20
@@ -15,12 +15,13 @@ clock= pygame.time.Clock()
 score= 0
 level= 0
 lines= 0
+count= 0
+fpg= 48
 field= [[0]*10 for _ in range(22)]
 
 run= True
 play= True
 setState= False
-t= 48
 frameCounter= 0
 font= pygame.font.SysFont('arial', 15)
 
@@ -153,35 +154,36 @@ wallKickLong= {
 }
 
 def setSpeed(): 
-    global t
     if(level>=29):
-        t= 1
+        return 1
     elif(level>=19):
-        t= 2
+        return 2
     elif(level>=16):
-        t= 3
+        return 3
     elif(level>=13):
-        t= 4
+        return 4
     elif(level>=10):
-        t= 5
+        return 5
     elif(level==9):
-        t= 6
+        return 6
     elif(level==8):
-        t= 8
+        return 8
     elif(level==7):
-        t= 13
+        return 13
     elif(level==6):
-        t= 18
+        return 18
     elif(level==5):
-        t= 23
+        return 23
     elif(level==4):
-        t= 28
+        return 28
     elif(level==3):
-        t= 33
+        return 33
     elif(level==2):
-        t= 38
+        return 38
     elif(level==1):
-        t= 43
+        return 43
+    else:
+        return 48
 
 def blockTypeInit(last): 
     if(last==None):
@@ -197,6 +199,7 @@ def clear():
     global score
     global lines
     global level
+    global fpg
     lineCount= 0
     lineNums= []
     for i in range(len(field)):
@@ -214,7 +217,7 @@ def clear():
 
     lines+=lineCount
     level= lines//10
-    setSpeed()
+    fpg= setSpeed()
 
     if(lineCount==1):
         score+= 40* (level+1)
@@ -436,7 +439,7 @@ while run:
         keys= pygame.key.get_pressed()
 
         if(setState):
-            frameCount= 1500//t
+            frameCount= 1500//60
             if(block.checkFloor()):
                 if(frameCounter<frameCount):
                     frameCounter+=1
@@ -476,15 +479,18 @@ while run:
             if(block.checkFloor()):
                 setState= True
                 continue
-            block.y+=1
+            if(count== fpg):
+                block.y+=1
+                count= 0
+            else:
+                count+=1
     else:
         drawEndScreen()
         for event in pygame.event.get():
             if event.type== pygame.QUIT:
                 run= False
-
     pygame.display.update()
-    clock.tick(10)
+    clock.tick(60)
 
 #Testing
 # field[19][2]= 1
