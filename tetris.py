@@ -1,8 +1,3 @@
-'''
-Notes:
-- Blocks don't drop after level up
-'''
-
 blockSize= 20
 
 import random
