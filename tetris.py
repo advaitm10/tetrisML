@@ -1,6 +1,6 @@
 '''
 Notes:
-- Maybe adjust fps, cuz its too fast rn
+- Blocks don't drop after level up
 '''
 
 blockSize= 20
@@ -16,7 +16,8 @@ score= 0
 level= 0
 lines= 0
 count= 0
-fpg= 48
+fps= 30
+fpg= (fps*48)//60
 field= [[0]*10 for _ in range(22)]
 
 run= True
@@ -155,35 +156,35 @@ wallKickLong= {
 
 def setSpeed(): 
     if(level>=29):
-        return 1
+        return (fps*1)//60
     elif(level>=19):
-        return 2
+        return (fps*2)//60
     elif(level>=16):
-        return 3
+        return (fps*3)//60
     elif(level>=13):
-        return 4
+        return (fps*4)//60
     elif(level>=10):
-        return 5
+        return (fps*5)//60
     elif(level==9):
-        return 6
+        return (fps*6)//60
     elif(level==8):
-        return 8
+        return (fps*8)//60
     elif(level==7):
-        return 13
+        return (fps*13)//60
     elif(level==6):
-        return 18
+        return (fps*18)//60
     elif(level==5):
-        return 23
+        return (fps*23)//60
     elif(level==4):
-        return 28
+        return (fps*28)//60
     elif(level==3):
-        return 33
+        return (fps*33)//60
     elif(level==2):
-        return 38
+        return (fps*38)//60
     elif(level==1):
-        return 43
+        return (fps*43)//60
     else:
-        return 48
+        return (fps*48)//60
 
 def blockTypeInit(last): 
     if(last==None):
@@ -257,9 +258,6 @@ def drawWin():
             for x in block.hbox[y]:
                 if(x==1):
                     win.fill((255, 255, 255), (blockX, blockY, blockSize, blockSize))
-                    # if(block.checkFloor()):
-                    #     pygame.draw.rect(win, (255, 0, 0), (blockX, blockY, blockSize, blockSize), 5)
-                    # else:
                     pygame.draw.rect(win, (0, 0, 255), (blockX, blockY, blockSize, blockSize), 5)
                 blockX+=blockSize
             blockY+=blockSize
@@ -292,16 +290,6 @@ def checkKeys(keys):
         temp.x+=1
         if(not temp.checkCollide()):
             block.x+=1
-
-    #Testing
-    # elif(keys[pygame.K_UP]):
-    #     temp.y-=1
-    #     if(not temp.checkCollide()):
-    #         block.y-=1
-    # elif(keys[pygame.K_DOWN]):
-    #     temp.y+=1
-    #     if(not temp.checkCollide()):
-    #         block.y+=1
 
 def checkEvent():
     global run
@@ -365,7 +353,7 @@ class Block:
         return False
 
 
-    def rotate(self, ccw): #TODO wall kick
+    def rotate(self, ccw):
         lastRot= self.rotPos
         ogX= self.x
         ogY= self.y
@@ -490,27 +478,7 @@ while run:
             if event.type== pygame.QUIT:
                 run= False
     pygame.display.update()
-    clock.tick(60)
-
-#Testing
-# field[19][2]= 1
-# field[20][2]= 1
-# field[20][3]= 1
-# field[21][3]= 1
-
-# block.blockType= 2
-# block.rotPos= 3
-# block.hbox= hitboxes[(block.blockType, block.rotPos)][0]
-# block.dims= hitboxes[(block.blockType, block.rotPos)][1]
-# block.displace= hitboxes[(block.blockType, block.rotPos)][2]
-
-# while run:
-#     drawWin()
-#     keys= pygame.key.get_pressed()
-#     checkKeys(keys)
-#     checkEvent()
-#     pygame.display.update()
-#     clock.tick(20)
+    clock.tick(fps)
 
 pygame.quit()
 sys.exit()
